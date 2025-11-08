@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "zJmZxWZcQog=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\thusi\\OneDrive\\Desktop\\Independent-project-II\\Backend\\HappyTails_backend\\HappyTails_backend.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\thusi\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.10\\microsoft.aspnetcore.openapi.9.0.10.nupkg.sha512",
+    "C:\\Users\\thusi\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
