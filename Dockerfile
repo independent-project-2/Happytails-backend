@@ -10,7 +10,7 @@ RUN dotnet restore
 COPY . ./
 
 # Build and publish specific project
-RUN dotnet publish HappyTails_backend.csproj -c Release -o out
+RUN dotnet HappyTails_backend.csproj -c Release -o out
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
