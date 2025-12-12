@@ -6,19 +6,21 @@ WORKDIR /app
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy everything else and build
+# Copy everything else
 COPY . ./
-RUN dotnet publish -c Release -o out
+
+# Build and publish specific project
+RUN dotnet publish HappyTails_backend.csproj -c Release -o out
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
-# Copy built files from build stage
+# Copy built files
 COPY --from=build /app/out .
 
 # Expose port
 EXPOSE 8080
 
 # Start the app
-ENTRYPOINT ["dotnet", "HappyTails_backend.dll"]  
+ENTRYPOINT ["dotnet", "HappyTails_backend.dll"]
