@@ -2,15 +2,17 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -18,14 +20,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build the Docker image
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/my-image-name:$(date +%s)" >> $GITHUB_ENV
+
+      - name: Build Docker image
         run: |
-          IMAGE_TAG=my-image-name:$(date +%s)
           docker build -t $IMAGE_TAG .
           docker tag $IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
 
-      - name: Push Docker image
+      - name: Push Docker images
         run: |
-          IMAGE_TAG=my-image-name:$(date +%s)
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
           docker push $IMAGE_TAG
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
