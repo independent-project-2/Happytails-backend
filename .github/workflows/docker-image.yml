@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 jobs:
   build:
@@ -14,29 +12,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        if: github.event_name == 'push'
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Create tag ONCE
       - name: Set image tag
-        if: github.event_name == 'push'
-        run: echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/my-image-name:${GITHUB_SHA}" >> $GITHUB_ENV
+        run: |
+          echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/my-image-name:${GITHUB_SHA}" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          docker build -t my-image-name:test .
+          docker build -t $IMAGE_TAG .
+          docker tag $IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
 
-      - name: Tag image (push only)
-        if: github.event_name == 'push'
-        run: |
-          docker tag my-image-name:test $IMAGE_TAG
-          docker tag my-image-name:test ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
-
-      - name: Push Docker images
-        if: github.event_name == 'push'
+      - name: Push Docker image
         run: |
           docker push $IMAGE_TAG
           docker push ${{ secrets.DOCKER_USERNAME }}/my-image-name:latest
