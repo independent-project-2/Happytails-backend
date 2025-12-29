@@ -1,14 +1,18 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HappyTailBackend.Models
-{
+{   
+    [Table("blog")]
     public class Blog
     {
         public int Id { get; set; }
 
+        
+     
         [Required]
-        public string BannerImage { get; set; }
+        public string banner { get; set; }
 
         [Required]
         public string Title { get; set; }
@@ -16,6 +20,9 @@ namespace HappyTailBackend.Models
         [Required]
         public string Content { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime created_at	 { get; set; } = DateTime.UtcNow;
+        
+        [Required]
+        public int creater_id { get; set; } 
     }
 }

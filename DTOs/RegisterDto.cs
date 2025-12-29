@@ -5,7 +5,7 @@ namespace HappyTailBackend.DTOs
     public class RegisterDto
     {
         [Required]
-        public string Username { get; set; }
+        public string Name { get; set; }
 
         [Required]
         [EmailAddress]

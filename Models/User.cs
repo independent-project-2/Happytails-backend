@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HappyTailBackend.Models
 {
@@ -8,14 +9,19 @@ namespace HappyTailBackend.Models
         public int Id { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        
+    
+        public string Name { get; set; }
+        
+       
+        public string? Profile_picture { get; set; }
 
         [Required]
         [EmailAddress]
         public string Email { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
 
         // Navigation property
         public List<Pet> Pets { get; set; }
