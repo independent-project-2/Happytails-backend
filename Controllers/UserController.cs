@@ -5,11 +5,13 @@ using HappyTailBackend.Models;
 using HappyTailBackend.DTOs;
 using System.Threading.Tasks;
 using HappyTailBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace HappyTailBackend.Controllers
-{
+{    
     [ApiController]
+     [AllowAnonymous]
     [Route("api/[controller]")]
     public class UserController(DataContext context, AuthService authService) : ControllerBase
     {
@@ -24,9 +26,9 @@ namespace HappyTailBackend.Controllers
 
             var user = new User
             {
-                Username = dto.Username,
+                Name = dto.Name,
                 Email = dto.Email,
-                PasswordHash = _authService.HashPassword(dto.Password)
+                Password = _authService.HashPassword(dto.Password)
             };
 
             _context.Users.Add(user);
@@ -34,15 +36,18 @@ namespace HappyTailBackend.Controllers
 
             var token = _authService.GenerateJwtToken(user);
 
-            return Ok(new { token });
+            return Ok(new{ message = "Registration successful",token});
         }
+
+
+
 
         [HttpPost("signin")]
         public async Task<IActionResult> Signin(LoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user == null || !_authService.VerifyPassword(dto.Password, user.PasswordHash))
-                return Unauthorized("Invalid credentials");
+            if (user == null || !_authService.VerifyPassword(dto.Password, user.Password))
+                return Unauthorized("please check your email and password");
 
             var token = _authService.GenerateJwtToken(user);
             return Ok(new { token });

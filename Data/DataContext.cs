@@ -21,8 +21,8 @@ namespace HappyTailBackend.Data
             // User-Pet relationship
             modelBuilder.Entity<User>()
                         .HasMany(u => u.Pets)
-                        .WithOne(p => p.Owner)
-                        .HasForeignKey(p => p.OwnerId)
+                        .WithOne(p => p.Shelter)
+                        .HasForeignKey(p => p.Shelter_id)
                         .OnDelete(DeleteBehavior.Cascade);
 
             // Optional: additional constraints
