@@ -31,6 +31,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 
 
+
 // Auth service
 builder.Services.AddScoped<AuthService>();
 
@@ -80,15 +81,15 @@ var app = builder.Build();
 
 // -------------------- DB CONNECTION CHECK --------------------
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
-    if (db.Database.CanConnect())
-        Console.WriteLine(" MySQL DB connected successfully on port 3306");
-    else
-        Console.WriteLine(" MySQL DB connection failed");
-}
+//     if (db.Database.CanConnect())
+//         Console.WriteLine(" MySQL DB connected successfully on port 3306");
+//     else
+//         Console.WriteLine(" MySQL DB connection failed");
+// }
 
 // -------------------- MIDDLEWARE --------------------
 
