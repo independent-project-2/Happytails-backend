@@ -22,7 +22,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(
         connectionString,
-        ServerVersion.AutoDetect(connectionString)
+        new MySqlServerVersion(new Version(8, 0, 36))
     )
 );
 
