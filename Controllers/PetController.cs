@@ -219,5 +219,65 @@ namespace HappyTailBackend.Controllers
 
 
         }
+
+        // Protected: Delete pet
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeletePet(int id)
+        {
+            // 1. Read Authorization header
+            var authHeader = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                return Unauthorized(new { message = "Token missing" });
+
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+
+            int shelterId;
+
+            try
+            {
+                // 2. Validate JWT
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_jwtSecret);
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+
+                // 3. Extract shelter ID
+                var shelterIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (shelterIdClaim == null || !int.TryParse(shelterIdClaim, out shelterId))
+                    return Unauthorized(new { message = "Invalid token" });
+            }
+            catch
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            // 4. Find pet
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet == null)
+                return NotFound(new { message = "Pet not found" });
+
+            // 5. Check ownership
+            if (pet.Shelter_id != shelterId)
+                return Forbid("You are not allowed to delete this pet");
+
+            // 6. Delete pet
+            _context.Pets.Remove(pet);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Pet deleted successfully 🗑️"
+            });
+        }
+
     }
 }
