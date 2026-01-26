@@ -17,14 +17,14 @@ builder.Services.AddControllers();
 
 
 // MySQL DbContext
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseMySql(
-        connectionString,
-        new MySqlServerVersion(new Version(8, 0, 36))
-    )
-);
+// builder.Services.AddDbContext<DataContext>(options =>
+//     options.UseMySql(
+//         connectionString,
+//         new MySqlServerVersion(new Version(8, 0, 36))
+//     )
+// );
 
 
 
