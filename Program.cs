@@ -17,14 +17,14 @@ builder.Services.AddControllers();
 
 
 // MySQL DbContext
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// builder.Services.AddDbContext<DataContext>(options =>
-//     options.UseMySql(
-//         connectionString,
-//         new MySqlServerVersion(new Version(8, 0, 36))
-//     )
-// );
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseMySql(
+        connectionString,
+        new MySqlServerVersion(new Version(8, 0, 36))
+    )
+);
 
 
 
@@ -81,15 +81,15 @@ var app = builder.Build();
 
 // -------------------- DB CONNECTION CHECK --------------------
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
-//     if (db.Database.CanConnect())
-//         Console.WriteLine(" MySQL DB connected successfully on port 3306");
-//     else
-//         Console.WriteLine(" MySQL DB connection failed");
-// }
+    if (db.Database.CanConnect())
+        Console.WriteLine(" MySQL DB connected successfully on port 3306");
+    else
+        Console.WriteLine(" MySQL DB connection failed");
+}
 
 // -------------------- MIDDLEWARE --------------------
 
