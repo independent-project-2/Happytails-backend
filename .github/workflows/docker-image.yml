@@ -1,0 +1,34 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Create tag ONCE
+      - name: Set image tag
+        run: |
+          echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/happytail-api:${GITHUB_SHA}" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_TAG .
+          docker tag $IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/happytail-api:latest
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_TAG
+          docker push ${{ secrets.DOCKER_USERNAME }}/happytail-api:latest
