@@ -8,7 +8,8 @@ using System.IdentityModel.Tokens.Jwt;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+// MySQL DbContext
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 
 // Controllers
@@ -16,8 +17,16 @@ builder.Services.AddControllers();
 
 
 
-// MySQL DbContext
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Inject password from env var
+var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+if (!string.IsNullOrEmpty(password))
+{
+    var builderConn = new MySqlConnector.MySqlConnectionStringBuilder(connectionString);
+    builderConn.Password = password;
+    connectionString = builderConn.ConnectionString;
+}
+
+
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(
