@@ -39,11 +39,14 @@ namespace HappyTailBackend.Controllers
             _jwtSecret = configuration["Jwt:Secret"]
                 ?? throw new Exception("JWT Secret missing");
 
-            var acc = new Account(
-           cloudinaryConfig.Value.CloudName,
-           cloudinaryConfig.Value.ApiKey,
-           cloudinaryConfig.Value.ApiSecret
-       );
+           var cloudName = cloudinaryConfig.Value.CloudName 
+        ?? throw new Exception("Cloudinary CloudName not set!");
+    var apiKey = cloudinaryConfig.Value.ApiKey 
+        ?? throw new Exception("Cloudinary ApiKey not set!");
+    var apiSecret = cloudinaryConfig.Value.ApiSecret 
+        ?? throw new Exception("Cloudinary ApiSecret not set!");
+
+    var acc = new Account(cloudName, apiKey, apiSecret);
 
             _cloudinary = new Cloudinary(acc);
         }
