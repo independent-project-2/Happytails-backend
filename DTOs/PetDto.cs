@@ -15,5 +15,6 @@ namespace HappyTailBackend.DTOs
         public string Status { get; set; } = "AVAILABLE";
         public int Shelter_id { get; set; }
         public DateTime Created_at { get; set; } = DateTime.UtcNow;
+        public IFormFile? Image { get; set; }
     }
 }

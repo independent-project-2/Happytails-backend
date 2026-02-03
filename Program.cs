@@ -29,6 +29,15 @@ if (!string.IsNullOrEmpty(password))
 
 
 
+builder.Services.Configure<CloudinarySettings>(options =>
+{
+    options.CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUDNAME");
+    options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_APIKEY");
+    options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_APISECRET");
+});
+
+
+
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(
         connectionString,
