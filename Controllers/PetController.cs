@@ -107,7 +107,7 @@ namespace HappyTailBackend.Controllers
         // Protected: Add pet manually with JWT
         [HttpPost("create")]
 
-        public async Task<IActionResult> AddPet([FromForm] PetDto dto)
+        public async Task<IActionResult> AddPet([FromBody] PetDto dto)
 
         {
             //  JWT validation (your existing code stays the same)
