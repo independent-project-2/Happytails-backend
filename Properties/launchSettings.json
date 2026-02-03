@@ -8,7 +8,10 @@
       "applicationUrl": "http://+:8080",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+         
+       
         
+
       }
     }
   }
