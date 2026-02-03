@@ -40,6 +40,7 @@ namespace HappyTailBackend.Models
         public int Shelter_id { get; set; }
 
         public User Shelter { get; set; } = null!;
+        public string? Image { get; set; }
 
 
         public DateTime Created_at { get; set; } = DateTime.UtcNow;

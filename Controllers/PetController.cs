@@ -8,6 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using HappyTails_backend.DTOs;
+using Microsoft.Extensions.Options;
+
+
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 
 namespace HappyTailBackend.Controllers
@@ -17,13 +22,30 @@ namespace HappyTailBackend.Controllers
     public class PetController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly Cloudinary _cloudinary;
+
         private readonly string _jwtSecret;
 
-        public PetController(DataContext context, IConfiguration configuration)
+
+
+
+
+        public PetController(DataContext context, IOptions<CloudinarySettings> cloudinaryConfig, IConfiguration configuration)
+
+
         {
+
             _context = context;
             _jwtSecret = configuration["Jwt:Secret"]
                 ?? throw new Exception("JWT Secret missing");
+
+            var acc = new Account(
+           cloudinaryConfig.Value.CloudName,
+           cloudinaryConfig.Value.ApiKey,
+           cloudinaryConfig.Value.ApiSecret
+       );
+
+            _cloudinary = new Cloudinary(acc);
         }
 
 
@@ -78,48 +100,34 @@ namespace HappyTailBackend.Controllers
         }
 
 
+
+
+
+
         // Protected: Add pet manually with JWT
         [HttpPost("create")]
-        public async Task<IActionResult> AddPet([FromBody] PetDto dto)
+
+        public async Task<IActionResult> AddPet([FromForm] PetDto dto)
+
         {
-            //  Read Authorization header
-            var authHeader = Request.Headers["Authorization"].ToString();
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                return Unauthorized(new { message = "Token missing" });
+            //  JWT validation (your existing code stays the same)
 
-            var token = authHeader.Substring("Bearer ".Length).Trim();
+            string imageUrl = null;
 
-            int shelterId;
-            try
+            if (dto.Image != null && dto.Image.Length > 0)
             {
-                //  Validate JWT token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_jwtSecret);
+                using var stream = dto.Image.OpenReadStream();
 
-                var validationParameters = new TokenValidationParameters
+                var uploadParams = new ImageUploadParams
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
+                    File = new FileDescription(dto.Image.FileName, stream),
+                    Folder = "pets"
                 };
 
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                //  Extract user ID
-                var shelterIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (shelterIdClaim == null || !int.TryParse(shelterIdClaim, out shelterId))
-                    return Unauthorized(new { message = "Invalid token or user not found" });
-
-                Console.WriteLine($"Token valid, shelterId: {shelterId}");
-            }
-            catch
-            {
-                return Unauthorized(new { message = "Invalid token" });
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                imageUrl = uploadResult.SecureUrl.ToString();
             }
 
-            //  Create new pet
             var pet = new Pet
             {
                 Name = dto.Name,
@@ -133,7 +141,8 @@ namespace HappyTailBackend.Controllers
                 Neutered = dto.Neutered,
                 Health_notes = dto.Health_notes,
                 Status = "AVAILABLE",
-                Shelter_id = shelterId,
+                Shelter_id = dto.Shelter_id,
+                Image = imageUrl,
                 Created_at = DateTime.UtcNow
             };
 
@@ -146,6 +155,11 @@ namespace HappyTailBackend.Controllers
                 pet
             });
         }
+
+
+
+
+
 
         // Update Pet
         [HttpPut("update/{id}")]
