@@ -9,6 +9,15 @@ using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000") // Your React URL
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
 
 
 // Controllers
@@ -36,6 +45,14 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddScoped<AuthService>();
 
 
+// Add Auth services
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => 
+    {
+        // Add your JWT Bearer configuration here (TokenValidationParameters, etc.)
+    });
+    
+builder.Services.AddAuthorization();
 
 
 
@@ -75,37 +92,49 @@ builder.Services.AddSwaggerGen(c =>
 
 // -------------------- BUILD APP --------------------
 
-var app = builder.Build();
-
-
-
-// -------------------- DB CONNECTION CHECK --------------------
-
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-
-//     if (db.Database.CanConnect())
-//         Console.WriteLine(" MySQL DB connected successfully on port 3306");
-//     else
-//         Console.WriteLine(" MySQL DB connection failed");
-// }
-
-// -------------------- MIDDLEWARE --------------------
-
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var app = builder.Build();
+
+
+
+    // -------------------- DB CONNECTION CHECK --------------------
+
+    // using (var scope = app.Services.CreateScope())
+    // {
+    //     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+    //     if (db.Database.CanConnect())
+    //         Console.WriteLine(" MySQL DB connected successfully on port 3306");
+    //     else
+    //         Console.WriteLine(" MySQL DB connection failed");
+    // }
+
+    // -------------------- MIDDLEWARE --------------------
+
+    if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'self' https://localhost:44374/;");
+        await next();
+    });
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Console.WriteLine($"Application startup failed: {ex.Message}");
+    throw;
+}

@@ -5,6 +5,8 @@ public class PetResponseDto
     public string Type { get; set; } = null!;
     public string? Breed { get; set; }
     public int Age { get; set; }
+    public string Location { get; set; } = null!;
+    public string? Description { get; set; }
     public decimal Price { get; set; }
     public bool Vaccinated { get; set; }
     public bool Neutered { get; set; }
