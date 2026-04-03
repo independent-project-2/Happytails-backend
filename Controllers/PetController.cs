@@ -53,6 +53,7 @@ namespace HappyTailBackend.Controllers
      .Select(p => new PetResponseDto
      {
          Id = p.Id,
+         UserId = p.Shelter_id,
          Name = p.Name,
          Type = p.Type,
          Breed = p.Breed,
