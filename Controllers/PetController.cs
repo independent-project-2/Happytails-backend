@@ -8,6 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using HappyTails_backend.DTOs;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.Extensions.Options;
+using HappyTailBackend.Helpers;
 
 
 namespace HappyTailBackend.Controllers
@@ -18,12 +22,23 @@ namespace HappyTailBackend.Controllers
     {
         private readonly DataContext _context;
         private readonly string _jwtSecret;
+        private readonly Cloudinary _cloudinary;
 
-        public PetController(DataContext context, IConfiguration configuration)
+        public PetController(
+            DataContext context, 
+            IConfiguration configuration,
+            IOptions<CloudinarySettings> cloudinaryConfig)
         {
             _context = context;
             _jwtSecret = configuration["Jwt:Secret"]
                 ?? throw new Exception("JWT Secret missing");
+
+            var acc = new Account(
+                cloudinaryConfig.Value.CloudName,
+                cloudinaryConfig.Value.ApiKey,
+                cloudinaryConfig.Value.ApiSecret
+            );
+            _cloudinary = new Cloudinary(acc);
         }
 
 
@@ -41,6 +56,7 @@ namespace HappyTailBackend.Controllers
          Name = p.Name,
          Type = p.Type,
          Breed = p.Breed,
+         ImageUrl = p.ImageUrl,
          Age = p.Age,
          Location = p.Location,
          Price = p.Price,
@@ -79,6 +95,28 @@ namespace HappyTailBackend.Controllers
             return Ok(pets);
         }
 
+
+
+        // Upload Pet Image
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file found.");
+
+            using var stream = file.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream)
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            if (uploadResult.Error != null)
+                return BadRequest(uploadResult.Error.Message);
+
+            return Ok(new { url = uploadResult.SecureUrl.ToString() });
+        }
 
         // Protected: Add pet manually with JWT
         [HttpPost("create")]
@@ -127,6 +165,7 @@ namespace HappyTailBackend.Controllers
                 Name = dto.Name,
                 Type = dto.Type,
                 Breed = dto.Breed,
+                ImageUrl = dto.ImageUrl,
                 Age = dto.Age,
                 Location = dto.Location,
                 Price = dto.Price,

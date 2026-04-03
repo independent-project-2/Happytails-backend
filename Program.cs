@@ -1,5 +1,6 @@
 using System.Text;
 using HappyTailBackend.Data;
+using HappyTailBackend.Helpers;
 using HappyTailBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 // Auth service
 builder.Services.AddScoped<AuthService>();
+
+// Cloudinary settings
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 
 // Add Auth services
